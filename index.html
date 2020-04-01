@@ -87,6 +87,7 @@
 		<div id="menu">
 			<button id="table">TABLE</button>
 			<button id="sphere">SPHERE</button>
+			<button id="pyramid">PYRAMID</button>
 			<button id="helix">HELIX</button>
 			<button id="grid">GRID</button>
 		</div>
@@ -224,7 +225,7 @@
 			var controls;
 
 			var objects = [];
-			var targets = { table: [], sphere: [], helix: [], grid: [] };
+			var targets = { table: [], sphere: [], helix: [], grid: [], pyramid: [] };
 
 			init();
 			animate();
@@ -340,9 +341,68 @@
 					object.position.x = ( ( i % 5 ) * 400 ) - 800;
 					object.position.y = ( - ( Math.floor( i / 5 ) % 5 ) * 400 ) + 800;
 					object.position.z = ( Math.floor( i / 25 ) ) * 1000 - 2000;
-
+					
 					targets.grid.push( object );
 
+				}
+
+				// pyramid
+				
+				var vector = new THREE.Vector3();
+				var axis = new THREE.Vector3( 0, 1, 0 );
+				var lookAt = new THREE.Vector3();
+				var localLookAt = new THREE.Vector3();
+
+				// sides
+				var itemH = 250;
+				var itemW = 280;
+				var startH = itemH * 2;
+				for ( var sides = 0; sides < 4; sides++ ){
+					
+					var angle = Math.PI * 0.5 * sides;
+					var firstItem = 1;
+					
+					lookAt.set( 0, 1, 1 ).normalize().applyAxisAngle(axis, angle);
+					
+					for ( var rows = 0; rows < 5; rows++ ){
+						
+					var items = firstItem + ( rows * 2 );
+					var h = startH - ( rows * itemH );
+					var w = -( ( items - 1 ) / 2 ) * itemW;
+						
+					for ( var i = 0; i < items; i++ ){
+							
+							var object = new THREE.Object3D();
+							
+							object.position.set ( w + ( i * itemW ), h, ( rows + 1 ) * itemW );
+
+							object.position.applyAxisAngle( axis, angle );
+
+							object.lookAt( localLookAt.addVectors( object.position, lookAt ));
+
+							targets.pyramid.push( object );
+					}
+					}
+				
+				}
+				// base
+				lookAt.set( 0, 1, 0 );
+				var step = ( itemW * 9 ) / 5;
+				for ( var i = 0; i < 18; i ++ ){
+
+					var object = new THREE.Object3D();
+					
+					var x = -itemW * 4;
+					var y = -itemH * 2.2;
+					var z = -itemW * 4;
+					var row = Math.floor(i / 5);
+					var col = i - (row * 5);
+
+					object.position.set( x + ( col * step ), y, z + ( row * step * 1.25 ) )	
+
+					object.lookAt( localLookAt.addVectors( object.position, lookAt ) );
+
+					targets.pyramid.push( object );
 				}
 
 				//
@@ -387,6 +447,13 @@
 				}, false );
 
 				transform( targets.table, 2000 );
+
+				var button = document.getElementById( 'pyramid' );
+				button.addEventListener( 'click', function () {
+
+					transform( targets.pyramid, 2000 );
+
+				}, false );
 
 				//
 
